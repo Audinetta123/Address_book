@@ -1,26 +1,17 @@
-# Slim Framework 3 Skeleton Application
+# REST API using Slim Framework 3 Skeleton Application
 
-Use this skeleton application to quickly setup and start working on a new Slim Framework 3 application. This application uses the latest Slim 3 with the PHP-View template renderer. It also uses the Monolog logger.
+1 install composer
 
-This skeleton application was built for Composer. This makes setting up a new Slim Framework application quick and easy.
+2 Run this command from the directory in which you want to install your new Slim Framework application
 
-## Install the Application
-
-Run this command from the directory in which you want to install your new Slim Framework application.
-
-    php composer.phar create-project slim/slim-skeleton [my-app-name]
-
-Replace `[my-app-name]` with the desired directory name for your new application. You'll want to:
+    php composer create-project slim/slim-skeleton [my-app-name]
 
 * Point your virtual host document root to your new application's `public/` directory.
-* Ensure `logs/` is web writeable.
 
-To run the application in development, you can also run this command. 
+3 Run this command:
+sudo php -S localhost:8080 -t public public/index.php
 
-	php composer.phar start
+4 Insert db "Address_book" into your database
 
-Run this command to run the test suite
+5 Use Postman to test the API
 
-	php composer.phar test
-
-That's it! Now go build something cool.
