@@ -20,8 +20,8 @@ return [
         "db" => [
             "host" => "localhost",
             "dbname" => "address_book",
-            "user" => "root",
-            "pass" => "aude"
+            "user" => "", // username
+            "pass" => "" //  usermdp
         ],
 
     ],
