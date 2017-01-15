@@ -8,8 +8,9 @@
 
 * Point your virtual host document root to your new application's `public/` directory.
 
-3 Run this command:
-sudo php -S localhost:8080 -t public public/index.php
+3 Run this command
+
+    sudo php -S localhost:8080 -t public public/index.php
 
 4 Insert db "Address_book" into your database
 
