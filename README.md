@@ -12,7 +12,7 @@
 
     sudo php -S localhost:8080 -t public public/index.php
 
-4 Insert db "Address_book" into your database
+4 Insert db "Address_book.sql" into your database
 
 5 Use Postman to test the API
 
