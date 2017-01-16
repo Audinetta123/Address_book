@@ -39,7 +39,8 @@ function verifApi($database){
      $id=$database->prepare("SELECT id FROM users WHERE api_key = :apikey");
      $id->bindParam(":apikey", $api['key']);
      $id->execute();
-     $api["idUser"]=intval($id->fetch());
+     $apig=$id->fetchObject();
+     $api["idUser"]=intval($apig->id);
  }
 
  return $api;

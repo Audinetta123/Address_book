@@ -3,7 +3,6 @@
 
 // Routes
 
-
 $app->post("/register", function($request, $response) {
 
 
@@ -53,23 +52,22 @@ $app->post("/login", function($request, $response) {
         $passwordHashCheck= new PassHash();
         $passwordCheck=$passwordHashCheck->check_password($passwordHash->password_hash, $input['password']);
 
-        $api_key=$this->db->prepare("SELECT api_key FROM users WHERE surname=:surname");
-        $api_key->bindParam("surname", $input['surname']);
-        $api_key->execute();
-        $api_key_result  = $api_key->fetchObject();
+        if ($passwordCheck==true) {
+         $api_key=$this->db->prepare("SELECT api_key FROM users WHERE surname=:surname");
+         $api_key->bindParam("surname", $input['surname']);
+         $api_key->execute();
+         $api_key_result  = $api_key->fetchObject();
 
-        return $this->response->withJson($api_key_result);
+         $data=["error" => false, "message" => "user is logged-in successfully => api_key: ".$api_key_result->api_key];
+         return $this->response->withJson($data);
+     }
 
-    }
-    else {
+     else {
 
-        $data=["error" => true, "message" => "bad entry"];
-        return $this->response->withJson($data);
-
-    }
-
-
-
+        $data=["error" => true, "message" => "bad entry => user is not registered"];
+        return $this->response->withJson($data,401);
+    }   
+}
 });
 
 $app->get('/', function() use($app) {
@@ -78,7 +76,6 @@ $app->get('/', function() use($app) {
 
 
 //GET all contacts
-
 
 $app->get("/contacts", function($request, $response) { 
     $contact = []; 
@@ -107,8 +104,6 @@ $app->post('/contact', function ($request, $response) {
 
     $api=verifApi($this->db);
 
-
-
     $input = $request->getParsedBody();
 
     if ($api['exist']==1) {
@@ -132,17 +127,13 @@ $app->post('/contact', function ($request, $response) {
             $output['id'] = $this->db->lastInsertId();
 
 
-
-
             $data=["error" => false, "message" => "Record has been added to database with id:".$output['id']];
-            
-
             return $this->response->withJson($data,201);
 
         } else {
 
-            $data=["error" => true, "message" => "Error has occured"];
-            return $this->response->withJson($data,);
+            $data=["error" => true, "message" => "Error has occured / verify input fields"];
+            return $this->response->withJson($data,400);
         }
 
     } else {
