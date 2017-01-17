@@ -79,7 +79,7 @@ $app->get('/', function() use($app) {
 
 $app->get("/contacts", function($request, $response) { 
     $contact = []; 
-    $query = $this->db->query("SELECT * FROM contacts ORDER BY id DESC;"); 
+    $query = $this->db->query("SELECT * FROM contacts ORDER BY id ASC;"); 
     $fetch = $query->fetchAll(); 
     for ($i = 0; $i < sizeof($fetch); $i++) { 
         $contacts[] = ["id" => $fetch[$i]["id"], "civility" => $fetch[$i]["civility"], "surname" => $fetch[$i]["surname"], "date_of_birth" => $fetch[$i]["date_of_birth"], "created_on" => $fetch[$i]["created_on"], "updated_on" => $fetch[$i]["updated_on"]]; } 
@@ -95,6 +95,16 @@ $app->get('/contacts/[{id}]', function ($request, $response, $args) {
     $sth->execute();
     $contacts = $sth->fetchObject();
     return $this->response->withJson(!empty($contacts) ? $contacts : ["error" => true, "message" => "No records found in database"], 200, JSON_PRETTY_PRINT);
+});
+
+// GET address with specific id
+
+$app->get('/addresses/[{id}]', function ($request, $response, $args) {
+    $sth = $this->db->prepare("SELECT * FROM addresses WHERE id=:id");
+    $sth->bindParam("id", $args['id']);
+    $sth->execute();
+    $address = $sth->fetchObject();
+    return $this->response->withJson(!empty($address) ? $address : ["error" => true, "message" => "No records found in database"], 200, JSON_PRETTY_PRINT);
 });
 
 
@@ -132,7 +142,7 @@ $app->post('/contact', function ($request, $response) {
 
         } else {
 
-            $data=["error" => true, "message" => "Error has occured / verify input fields"];
+            $data=["error" => true, "message" => "Error has occured -> verify input fields"];
             return $this->response->withJson($data,400);
         }
 
@@ -149,9 +159,9 @@ $app->post('/contact', function ($request, $response) {
 
 $app->put('/contact/[{id}]', function ($request, $response, $args) {
 
+    $api=verifApi($this->db);
+
     $input = $request->getParsedBody();
-
-
 
     if (isset($args['id']) && isset($input['civility']) && isset($input['surname']) && isset($input['firstname']) && isset($input['date_of_birth'])){
 
@@ -165,7 +175,7 @@ $app->put('/contact/[{id}]', function ($request, $response, $args) {
 
         $sth->execute();
 
-        $data=["error" => false, "message" => "Record with ".$args['id']." has been updated"];
+        $data=["error" => false, "message" => "Record with id: ".$args['id']." has been updated"];
         return $this->response->withJson($data);
 
     }
@@ -180,23 +190,80 @@ $app->put('/contact/[{id}]', function ($request, $response, $args) {
 });
 
 
-// DELETE  contact with related address(es)
+//POST an address
 
-$app->delete('/contact/[{id}]', function ($request, $response) {
+
+$app->post('/address/[{id}]', function ($request, $response, $args) {
+
+    $api=verifApi($this->db);
+
+    $input = $request->getParsedBody();
+
+    $id_user = $api["idUser"];
+
     $get_id = $request->getAttribute('id');
 
-    $test=$this->db->prepare("SELECT * FROM contacts WHERE id=:id");
-    $test->bindParam(':id', $get_id);
-    $test->execute();
-    $hello=$test->fetch();
+    $sth=$this->db->prepare("SELECT * FROM contacts WHERE id=:id");
+    $sth->bindParam(':id', $get_id);
+    $sth->execute();
+    $result=$sth->fetch();
 
-    if ($hello!=false) {
-        $sth = $this->db->prepare("DELETE FROM contacts WHERE id=$get_id");
-        $result=$sth->execute();
+    if ($api['exist']==1 && $id_user==intval($result["id_user"])) {
+
+     if (!empty($input['postal_code']) && !empty($input['city'])) {
+
+        $sth2=$this->db->prepare("INSERT INTO addresses (street, postal_code, city, created_on, updated_on, id_contact) VALUES (:street,:postal_code, :city, 
+            NOW(), NOW(), :id_contact)");
+
+        $sth2->bindParam(":street", $input['street']);
+        $sth2->bindParam(":postal_code", $input['postal_code']);
+        $sth2->bindParam(":city", $input['city']);
+        $sth2->bindParam(":id_contact", intval($result['id']));
+
+        $sth2->execute();
+
+        $output['id'] = $this->db->lastInsertId();
+
+        $data=["error" => false, "message" => "Address has been added to database with id:".$output['id']];
+        return $this->response->withJson($data,201);
+    }
+
+    else {
+        $data=["error" => true, "message" => "Error has occured -> verify input fields"];
+        return $this->response->withJson($data,400);
+    }
+}
+
+else {
+
+    $data=["error" => true, "message" => "apiKey is not valid"];
+    return $this->response->withJson($data,401);
+}
+
+});
+
+// DELETE  contact with related address(es) -> only contact by correct user (the one that created the contact) can be deleted
+
+$app->delete('/contact/[{id}]', function ($request, $response) {
+
+    $api=verifApi($this->db);
+
+    $get_id = $request->getAttribute('id');
+
+    $id_user = $api["idUser"];
+    
+    $sth=$this->db->prepare("SELECT * FROM contacts WHERE id=:id");
+    $sth->bindParam(':id', $get_id);
+    $sth->execute();
+    $result=$sth->fetch();
+
+    if ($result!=false && $id_user==intval($result["id_user"])) {
+        $sth2 = $this->db->prepare("DELETE FROM contacts WHERE id=$get_id");
+        $result=$sth2->execute();
     }
     else {
         $result=false;
     }
 
-    return $response->withJson($result==true ? ["error" => false, "message" => "entry has been deleted"] : ["error" => true, "message" => "entry has not been deleted"], 200, JSON_PRETTY_PRINT);
+    return $response->withJson($result==true ? ["error" => false, "message" => "entry has been deleted"] : ["error" => true, "message" => "entry has not been deleted -> check if contact specified has been created by user of id: ".$id_user.""], 200, JSON_PRETTY_PRINT);
 });
