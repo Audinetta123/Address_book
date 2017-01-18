@@ -30,17 +30,17 @@ function verifApi($database){
 
     $headers = apache_request_headers();
     $api["key"] = $headers["Authorization"];
-    $verifkey=$database->prepare("SELECT * FROM users WHERE api_key = :apikey");
+    $verifkey = $database->prepare("SELECT * FROM users WHERE api_key = :apikey");
     $verifkey->bindParam(":apikey", $api["key"]);
     $verifkey->execute();
-    $api["exist"]=$verifkey->rowCount();
+    $api["exist"] = $verifkey->rowCount();
 
-    if ($api["exist"]==1) {
-     $id=$database->prepare("SELECT id FROM users WHERE api_key = :apikey");
+    if ($api["exist"] === 1) {
+     $id = $database->prepare("SELECT id FROM users WHERE api_key = :apikey");
      $id->bindParam(":apikey", $api['key']);
      $id->execute();
-     $apig=$id->fetchObject();
-     $api["idUser"]=intval($apig->id);
+     $apig = $id->fetchObject();
+     $api["idUser"] = intval($apig->id);
  }
 
  return $api;
