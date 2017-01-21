@@ -44,9 +44,6 @@ $app->post("/register", function($request, $response) {
 $app->post("/login", function($request, $response) {
     $input = $request->getParsedBody();
 
-    var_dump( $input);
-    die;
-
     if (isset($input['surname']) && isset($input['password'])) {
 
         $sth = $this->db->prepare("SELECT password_hash FROM users WHERE surname = :surname");
@@ -63,7 +60,7 @@ $app->post("/login", function($request, $response) {
            $apiKey->execute();
            $apiKeyResult  = $apiKey->fetchObject();
 
-           $data=["error" => false, "message" => "user is logged-in successfully =>API key is : ".$apiKeyResult->api_key];
+           $data=["error" => false, "message" => "user is logged-in successfully => API key is : ".$apiKeyResult->api_key];
 
            return $this->response->withJson($data);
        }
@@ -125,7 +122,7 @@ $app->post('/contact', function ($request, $response) {
 
     $input = $request->getParsedBody();
 
-    if ($api['exist'] == 1) {
+    if (1 == $api['exist']) {
 
         if (!empty($input['civility']) && !empty($input['surname']) && !empty($input['firstname']) && !empty($input['date_of_birth'])) {
 
@@ -208,6 +205,7 @@ $app->post('/address/[{id}]', function ($request, $response, $args) {
 
     $api = verifApi($this->db);
 
+
     $input = $request->getParsedBody();
 
     $idUser = $api["idUser"];
@@ -219,7 +217,7 @@ $app->post('/address/[{id}]', function ($request, $response, $args) {
     $sth->execute();
     $result = $sth->fetch();
 
-    if ($api['exist'] == 1 && $idUser == intval($result["id_user"])) {
+    if (1 == $api['exist'] && $idUser == intval($result["id_user"])) {
 
        if (!empty($input['postal_code']) && !empty($input['city'])) {
 
@@ -249,7 +247,7 @@ $app->post('/address/[{id}]', function ($request, $response, $args) {
 
 else {
 
-    $data = ["error" => true, "message" => "apiKey is not valid"];
+    $data = ["error" => true, "message" => "Verify three of the followings: 1 => apiKey is not valid or 2 => id does not exist in database or 3 => verify id has been created with contact of correct apiKey"];
 
     return $this->response->withJson($data,401);
 }
