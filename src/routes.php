@@ -12,24 +12,39 @@ $app->post("/register", function($request, $response) {
     $passwordHash = new PassHash();
     $hash = $passwordHash->hash($input['password']);
 
-        // prepare the statement and then methods related to the request can be applied to the query string $sth so the presence of the arrows. 
-    $sth = $this->db->prepare("INSERT INTO users (surname, firstname, password_hash, api_key) VALUES (:surname, :firstname, :password_hash, :api_key)");
+        // test if username is already used?
+    $query = $this->db->prepare("SELECT * FROM users WHERE surname = :surname");
+    $query->bindParam("surname", $input['surname']);
+    $query->execute();
+    $queryUsername  = $query->fetchObject();
+    $row = $query->rowCount();
 
-        // var_dump($sth);
+    if (0 < $row) {
 
-    $sth->bindParam(":surname", $input['surname']);
-    $sth->bindParam(":firstname", $input['firstname']);
-    $sth->bindParam(":password_hash", $hash);
-    $sth->bindParam(":api_key", md5(uniqid(rand(), true)));
+        $data = ["error" => true, "message" => "Error has occured => Username ".$queryUsername->surname." already exists. Choose another name."];
 
-    $sth->execute();
+        return $this->response->withJson($data);
 
-    $output['id'] = $this->db->lastInsertId();
+    } else {
+
+            // prepare the statement and then methods related to the request can be applied to the query string $sth so the presence of the arrows. 
+        $sth = $this->db->prepare("INSERT INTO users (surname, firstname, password_hash, api_key) VALUES (:surname, :firstname, :password_hash, :api_key)");
+
+        $sth->bindParam(":surname", $input['surname']);
+        $sth->bindParam(":firstname", $input['firstname']);
+        $sth->bindParam(":password_hash", $hash);
+        $sth->bindParam(":api_key", md5(uniqid(rand(), true)));
+
+        $sth->execute();
+
+        $output['id'] = $this->db->lastInsertId();
 
 
-    $data = ["error" => false, "message" => "user has been added to database with id:".$output['id']];
+        $data = ["error" => false, "message" => "user has been added to database with id:".$output['id']];
 
-    return $this->response->withJson($data);
+        return $this->response->withJson($data);
+
+    }
 
 } else {
 
