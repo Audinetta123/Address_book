@@ -186,31 +186,53 @@ $app->put('/contact/[{id}]', function ($request, $response, $args) {
 
     $input = $request->getParsedBody();
 
-    if (isset($args['id']) && isset($input['civility']) && isset($input['surname']) && isset($input['firstname']) && isset($input['date_of_birth'])){
+    $idUser = $api["idUser"];
 
-        $sth = $this->db->prepare("UPDATE contacts SET civility=:civility, surname = :surname, firstname = :firstname, date_of_birth = :date_of_birth, updated_on = NOW() WHERE id = :id");
+    $getId = $request->getAttribute('id');
 
-        $sth->bindParam(":id", $args['id']);
-        $sth->bindParam(":civility", $input['civility']);
-        $sth->bindParam(":surname", $input['surname']);
-        $sth->bindParam(":firstname", $input['firstname']);
-        $sth->bindParam(":date_of_birth", $input['date_of_birth']);
+    $sth = $this->db->prepare("SELECT * FROM contacts WHERE id = :id");
+    $sth->bindParam(':id', $getId);
+    $sth->execute();
+    $result = $sth->fetch();
 
-        $sth->execute();
+    if ($result != false && 1 == $api['exist'] && $idUser == intval($result["id_user"])) {
 
-        $data = ["error" => false, "message" => "Record with id: ".$args['id']." has been updated"];
+        if (isset($args['id']) && isset($input['civility']) && isset($input['surname']) && isset($input['firstname']) && isset($input['date_of_birth'])){
 
-        return $this->response->withJson($data);
+            $sth2 = $this->db->prepare("UPDATE contacts SET civility=:civility, surname = :surname, firstname = :firstname, date_of_birth = :date_of_birth, updated_on = NOW() WHERE id = :id");
+
+            $sth2->bindParam(":id", $args['id']);
+            $sth2->bindParam(":civility", $input['civility']);
+            $sth2->bindParam(":surname", $input['surname']);
+            $sth2->bindParam(":firstname", $input['firstname']);
+            $sth2->bindParam(":date_of_birth", $input['date_of_birth']);
+
+            $sth2->execute();
+
+            $data = ["error" => false, "message" => "Record with id: ".$args['id']." has been updated"];
+
+            return $this->response->withJson($data);
+
+        }
+
+        else {
+
+            $data = ["error" => true, "message" => "Error has occured"];
+
+            return $this->response->withJson($data, 401);
+
+        }
 
     }
-
     else {
 
-        $data = ["error" => true, "message" => "Error has occured"];
+        $data = ["error" => true, "message" => "Verify three of the followings: 1 => apiKey is not valid or 2 => id does not exist in database or 3 => verify id has been created with contact of correct apiKey"];
 
-        return $this->response->withJson($data);
+        return $this->response->withJson($data,401);
 
     }
+
+
 
 });
 
@@ -232,7 +254,7 @@ $app->post('/address/[{id}]', function ($request, $response, $args) {
     $sth->execute();
     $result = $sth->fetch();
 
-    if (1 == $api['exist'] && $idUser == intval($result["id_user"])) {
+    if ($result != false && 1 == $api['exist'] && $idUser == intval($result["id_user"])) {
 
        if (!empty($input['postal_code']) && !empty($input['city'])) {
 
@@ -292,5 +314,7 @@ $app->delete('/contact/[{id}]', function ($request, $response) {
         $result = false;
     }
 
-    return $response->withJson($result == true ? ["error" => false, "message" => "entry with id ".$getId." was not deleted"] : ["error" => true, "message" => "entry with id ".$getId." was not deleted -> check whether contact specified initially existed or was created by user other than user of id: ".$idUser.""], 200, JSON_PRETTY_PRINT);
+    return $response->withJson($result == true ? ["error" => false, "message" => "entry with id ".$getId." was not deleted"] : ["error" => true, "message" => "entry with id ".$getId." was not deleted -> check whether contact specified initially existed or was created by user other than user of id: ".$idUser." or simply that entry exists"], 200, JSON_PRETTY_PRINT);
 });
+
+// ALTER TABLE addresses AUTO_INCREMENT = 1
