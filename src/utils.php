@@ -45,3 +45,31 @@ function verifApi($database){
 
  return $api;
 }
+
+function verifUser($database, $idContact){
+
+    $api = verifApi($database);
+
+    $getId = $idContact;
+
+    $idUser = $api["idUser"];
+  
+    $sth = $database->prepare("SELECT * FROM contacts WHERE id = :idUser");
+    $sth->bindParam(':idUser', $getId);
+    $sth->execute();
+    $result = $sth->fetch();
+
+    if ($result && $idUser == intval($result["id_user"]) && 1 == $api['exist']) {
+
+       return $result;
+    
+    }
+
+    else {
+
+        return false;
+  
+
+}
+
+}
