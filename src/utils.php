@@ -69,7 +69,18 @@ function verifUser($database, $idContact){
 
         return false;
   
+}
 
 }
+
+function verifUserExists($database, $surname){
+
+    $sth = $database->prepare("SELECT * FROM users WHERE surname = :surnameUser");
+    $sth->bindParam(':surnameUser', $surname);
+    $sth->execute();
+    $result = $sth->fetchObject();
+    $row = $sth->rowCount();
+
+   return $row;
 
 }

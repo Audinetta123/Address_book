@@ -6,22 +6,18 @@
 $app->post("/register", function($request, $response) {
 
 
- $input = $request->getParsedBody();
- if (isset($input['surname']) && isset($input['firstname']) && isset($input['password'])) {
+   $input = $request->getParsedBody();
+   if (isset($input['surname']) && isset($input['firstname']) && isset($input['password'])) {
 
     $passwordHash = new PassHash();
     $hash = $passwordHash->hash($input['password']);
 
         // test if username is already used?
-    $query = $this->db->prepare("SELECT * FROM users WHERE surname = :surname");
-    $query->bindParam("surname", $input['surname']);
-    $query->execute();
-    $queryUsername  = $query->fetchObject();
-    $row = $query->rowCount();
+    $userExists = verifUserExists($this->db, $input['surname']);
 
-    if (0 < $row) {
+    if (0 < $userExists) {
 
-        $data = ["error" => true, "message" => "Error has occured => Username ".$queryUsername->surname." already exists. Choose another name."];
+        $data = ["error" => true, "message" => "Error has occured => Username".$queryUsername->surname." already exists. Choose another name."];
 
         return $this->response->withJson($data);
 
@@ -72,18 +68,18 @@ $app->post("/login", function($request, $response) {
         $passwordCheck = $passwordHashCheck->check_password($passwordHash->password_hash, $input['password']);
 
         if ($passwordCheck == true) {
-           $apiKey = $this->db->prepare("SELECT api_key FROM users WHERE surname = :surname");
-           $apiKey->bindParam("surname", $input['surname']);
-           $apiKey->execute();
-           $apiKeyResult  = $apiKey->fetchObject();
+         $apiKey = $this->db->prepare("SELECT api_key FROM users WHERE surname = :surname");
+         $apiKey->bindParam("surname", $input['surname']);
+         $apiKey->execute();
+         $apiKeyResult  = $apiKey->fetchObject();
 
-           $data=["error" => false, "message" => "user is logged-in successfully => API key is : ".$apiKeyResult->api_key];
+         $data=["error" => false, "message" => "user is logged-in successfully => API key is : ".$apiKeyResult->api_key];
 
-           return $this->response->withJson($data);
+         return $this->response->withJson($data);
 
-       }
+     }
 
-       else {
+     else {
 
         $data = ["error" => true, "message" => "bad entry => user is not registered"];
 
@@ -246,7 +242,7 @@ $app->post('/address/[{id}]', function ($request, $response, $args) {
 
     if ($result) {
 
-       if (!empty($input['postal_code']) && !empty($input['city'])) {
+     if (!empty($input['postal_code']) && !empty($input['city'])) {
 
         $sth = $this->db->prepare("INSERT INTO addresses (street, postal_code, city, created_on, updated_on, id_contact) VALUES (:street, :postal_code, :city, 
             NOW(), NOW(), :id_contact)");
