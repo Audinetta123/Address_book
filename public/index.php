@@ -32,6 +32,11 @@ require __DIR__ . '/../src/routes.php';
 // Register utility
 require __DIR__ . '/../src/utils.php';
 
+// Models
+require __DIR__ . '/../models/user.class.php';
+require __DIR__ . '/../models/contact.class.php';
+require __DIR__ . '/../models/address.class.php';
+require __DIR__ . '/../models/connectdb.class.php';
 
 // Run app
 $app->run();
