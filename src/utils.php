@@ -36,24 +36,24 @@ function verifApi($database){
     $api["exist"] = $verifkey->rowCount();
 
     if ($api["exist"] === 1) {
-     $id = $database->prepare("SELECT id FROM users WHERE api_key = :apikey");
-     $id->bindParam(":apikey", $api['key']);
-     $id->execute();
-     $apig = $id->fetchObject();
-     $api["idUser"] = intval($apig->id);
- }
+       $id = $database->prepare("SELECT id FROM users WHERE api_key = :apikey");
+       $id->bindParam(":apikey", $api['key']);
+       $id->execute();
+       $apig = $id->fetchObject();
+       $api["idUser"] = intval($apig->id);
+   }
 
- return $api;
+   return $api;
 }
 
-function verifUser($database, $idContact){
+function verifUser($database, $idUser){
 
     $api = verifApi($database);
 
-    $getId = $idContact;
+    $getId = $idUser;
 
     $idUser = $api["idUser"];
-  
+    
     $sth = $database->prepare("SELECT * FROM contacts WHERE id = :idUser");
     $sth->bindParam(':idUser', $getId);
     $sth->execute();
@@ -61,14 +61,14 @@ function verifUser($database, $idContact){
 
     if ($result && $idUser == intval($result["id_user"]) && 1 == $api['exist']) {
 
-       return $result;
+     return $result;
+     
+ }
+
+ else {
+
+    return false;
     
-    }
-
-    else {
-
-        return false;
-  
 }
 
 }
@@ -81,6 +81,6 @@ function verifUserExists($database, $surname){
     $result = $sth->fetchObject();
     $row = $sth->rowCount();
 
-   return $row;
+    return $row;
 
 }

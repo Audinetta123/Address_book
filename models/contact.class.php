@@ -12,15 +12,19 @@ class Contacts {
 
 	public static function displayById($id) {
 
-		$sth = Database::bdd()->prepare("SELECT * FROM contacts WHERE id = $id");
+		$sth = Database::bdd()->prepare("SELECT * FROM contacts WHERE id_user = $id");
 		$sth->execute();
-		return $contacts = $sth->fetchObject();
+		return $contacts = $sth->fetchAll();
 		
 	}
 
 	public static function add($input, $iduser){
 
-		$sth = Database::bdd()->prepare("INSERT INTO contacts (civility, surname, firstname, date_of_birth, created_on, updated_on, id_user) VALUES (:civility,:surname, :firstname, :date_of_birth, NOW(), NOW(), :id_user)");
+		$base = new Database();
+
+		$bdd = $base::bdd();
+
+		$sth = $bdd->prepare("INSERT INTO contacts (civility, surname, firstname, date_of_birth, created_on, updated_on, id_user) VALUES (:civility,:surname, :firstname, :date_of_birth, NOW(), NOW(), :id_user)");
 
 		$sth->bindParam(":civility", $input['civility']);
 		$sth->bindParam(":surname", $input['surname']);
@@ -29,8 +33,8 @@ class Contacts {
 		$sth->bindParam(":id_user", $iduser);
 		$sth->execute();
 
-		// $output['id'] = Database::bdd()->lastInsertId();
-		$output['id'] = $sth->id;
+		$output['id'] = $bdd->lastInsertId();
+
 
 		return $data = ["error" => false, "message" => "Record has been added to database with id:".$output['id']];
 

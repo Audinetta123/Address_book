@@ -1,11 +1,11 @@
 -- phpMyAdmin SQL Dump
--- version 4.5.4.1deb2ubuntu2
--- http://www.phpmyadmin.net
+-- version 4.6.5.2
+-- https://www.phpmyadmin.net/
 --
--- Host: localhost
--- Generation Time: Jan 16, 2017 at 12:14 AM
--- Server version: 5.7.16-0ubuntu0.16.04.1
--- PHP Version: 7.0.8-0ubuntu0.16.04.3
+-- Host: localhost:3306
+-- Generation Time: Jun 20, 2017 at 02:56 PM
+-- Server version: 5.6.35
+-- PHP Version: 5.6.30
 
 SET SQL_MODE = "NO_AUTO_VALUE_ON_ZERO";
 SET time_zone = "+00:00";
@@ -17,7 +17,7 @@ SET time_zone = "+00:00";
 /*!40101 SET NAMES utf8mb4 */;
 
 --
--- Database: `address_book`
+-- Database: `addressBook`
 --
 
 -- --------------------------------------------------------
@@ -33,8 +33,9 @@ CREATE TABLE `addresses` (
   `city` varchar(20) NOT NULL,
   `created_on` datetime NOT NULL,
   `updated_on` datetime NOT NULL,
-  `id_contact` int(11) NOT NULL
-) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+  `id_contact` int(11) NOT NULL,
+  `id_user` int(11) DEFAULT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 ROW_FORMAT=COMPACT;
 
 -- --------------------------------------------------------
 
@@ -47,11 +48,11 @@ CREATE TABLE `contacts` (
   `civility` varchar(20) NOT NULL,
   `surname` varchar(25) NOT NULL,
   `firstname` varchar(25) NOT NULL,
-  `date_of_birth` date NOT NULL,
+  `date_of_birth` date DEFAULT NULL,
   `created_on` datetime NOT NULL,
   `updated_on` datetime NOT NULL,
   `id_user` int(11) NOT NULL
-) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 ROW_FORMAT=COMPACT;
 
 -- --------------------------------------------------------
 
@@ -65,7 +66,7 @@ CREATE TABLE `users` (
   `firstname` varchar(25) DEFAULT NULL,
   `password_hash` text NOT NULL,
   `api_key` varchar(32) DEFAULT NULL
-) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 ROW_FORMAT=COMPACT;
 
 --
 -- Indexes for dumped tables
@@ -100,17 +101,17 @@ ALTER TABLE `users`
 -- AUTO_INCREMENT for table `addresses`
 --
 ALTER TABLE `addresses`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=5;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
 --
 -- AUTO_INCREMENT for table `contacts`
 --
 ALTER TABLE `contacts`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=12;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
 --
 -- AUTO_INCREMENT for table `users`
 --
 ALTER TABLE `users`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=4;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
 --
 -- Constraints for dumped tables
 --

@@ -5,7 +5,11 @@ class Addresses {
 
 	public static function addById($input, $idcontact, $iduser){
 
-		$sth = Database::bdd()->prepare("INSERT INTO addresses (street, postal_code, city, created_on, updated_on, id_contact, id_user) VALUES (:street, :postal_code, :city, 
+		$base = new Database();
+
+		$bdd = $base::bdd();
+
+		$sth = $bdd->prepare("INSERT INTO addresses (street, postal_code, city, created_on, updated_on, id_contact, id_user) VALUES (:street, :postal_code, :city, 
 			NOW(), NOW(), :id_contact, :id_user)");
 
 		$sth->bindParam(":street", $input['street']);
@@ -16,18 +20,18 @@ class Addresses {
 
 		$sth->execute();
 
-		$output['id'] = Database::bdd()->lastInsertId();
+		$output['id'] = $bdd->lastInsertId();
 
 		return $data = ["error" => false, "message" => "Address has been added to database with id:".$output['id']];
 
 	}
 
-	public static function getById($id){
+	public static function getById($idContact, $idUser){
 
-		$sth = Database::bdd()->prepare("SELECT * FROM addresses WHERE id = $id");
+		$sth = Database::bdd()->prepare("SELECT * FROM addresses WHERE id_contact = $idContact AND id_user = $idUser ");
 		$sth->execute();
 		
-		return $address = $sth->fetchObject();
+		return $address = $sth->fetchAll();
 
 	}
 

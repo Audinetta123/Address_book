@@ -3,12 +3,13 @@
 class Users {
 
 	
-
 	public static function register($input, $hash) {
 
 		$base = new Database();
 
-		$sth = $base->bdd()->prepare("INSERT INTO users (surname, firstname, password_hash, api_key) VALUES (:surname, :firstname, :password_hash, :api_key)");
+		$bdd = $base->bdd();
+
+		$sth = $bdd->prepare("INSERT INTO users (surname, firstname, password_hash, api_key) VALUES (:surname, :firstname, :password_hash, :api_key)");
 
 		$sth->bindParam(":surname", $input['surname']);
 		$sth->bindParam(":firstname", $input['firstname']);
@@ -17,14 +18,9 @@ class Users {
 
 		$sth->execute();
 
-		// $output['id'] = $sth->fetch(Database::FETCH_ASSOC);
+		$output = $bdd->lastInsertId();
 
-		$output['id'] = $base->bdd()->lastInsertId();
-
-		var_dump($output['id']);
-		die;
-
-		return $data = ["error" => false, "message" => "user has been added to database with id:".$output['id']];
+		return $data = ["error" => false, "message" => "user has been added to database with id:".$output];
 
 	}
 
@@ -45,7 +41,7 @@ class Users {
 		$apiKey->execute();
 		$apiKeyResult  = $apiKey->fetchObject();
 
-		return $data=["error" => false, "message" => "user is logged-in successfully => API key is : ".$apiKeyResult->api_key];
+		return $data=["error" => false, "apiKey" => $apiKeyResult->api_key];
 
 	}
 
